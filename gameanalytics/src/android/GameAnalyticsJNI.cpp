@@ -661,12 +661,17 @@ namespace gameanalytics {
                     jstring j_progression01 = env->NewStringUTF(progression01);
                     jstring j_progression02 = env->NewStringUTF(progression02);
                     jstring j_progression03 = env->NewStringUTF(progression03);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    jstring j_fields = NULL;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, progressionStatus, j_progression01, j_progression02, j_progression03, j_fields, mergeFields);
                     env->DeleteLocalRef(j_progression01);
                     env->DeleteLocalRef(j_progression02);
                     env->DeleteLocalRef(j_progression03);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -697,12 +702,17 @@ namespace gameanalytics {
                     jstring j_progression01 = env->NewStringUTF(progression01);
                     jstring j_progression02 = env->NewStringUTF(progression02);
                     jstring j_progression03 = env->NewStringUTF(progression03);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    jstring j_fields = NULL;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, progressionStatus, j_progression01, j_progression02, j_progression03, (double)score, j_fields, mergeFields);
                     env->DeleteLocalRef(j_progression01);
                     env->DeleteLocalRef(j_progression02);
                     env->DeleteLocalRef(j_progression03);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -731,10 +741,15 @@ namespace gameanalytics {
                 if(jMethod)
                 {
                     jstring j_eventId = env->NewStringUTF(eventId);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    jstring j_fields = NULL;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, j_eventId, j_fields, mergeFields);
                     env->DeleteLocalRef(j_eventId);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -763,10 +778,15 @@ namespace gameanalytics {
                 if(jMethod)
                 {
                     jstring j_eventId = env->NewStringUTF(eventId);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    jstring j_fields = NULL;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, j_eventId, value, j_fields, mergeFields);
                     env->DeleteLocalRef(j_eventId);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
