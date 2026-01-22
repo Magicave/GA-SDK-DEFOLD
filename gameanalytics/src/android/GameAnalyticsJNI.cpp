@@ -544,13 +544,21 @@ namespace gameanalytics {
                     jstring j_itemType = env->NewStringUTF(itemType);
                     jstring j_itemId = env->NewStringUTF(itemId);
                     jstring j_cartType = env->NewStringUTF(cartType);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, j_currency, amount, j_itemType, j_itemId, j_cartType, j_fields, mergeFields);
                     env->DeleteLocalRef(j_currency);
                     env->DeleteLocalRef(j_itemType);
                     env->DeleteLocalRef(j_itemId);
                     env->DeleteLocalRef(j_cartType);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -625,12 +633,20 @@ namespace gameanalytics {
                     jstring j_currency = env->NewStringUTF(currency);
                     jstring j_itemType = env->NewStringUTF(itemType);
                     jstring j_itemId = env->NewStringUTF(itemId);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, flowType, j_currency, amount, j_itemType, j_itemId, j_fields, mergeFields);
                     env->DeleteLocalRef(j_currency);
                     env->DeleteLocalRef(j_itemType);
                     env->DeleteLocalRef(j_itemId);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -662,9 +678,12 @@ namespace gameanalytics {
                     jstring j_progression02 = env->NewStringUTF(progression02);
                     jstring j_progression03 = env->NewStringUTF(progression03);
                     
-                    jstring j_fields = NULL;
+                    // Default to "{}"
+                    jstring j_fields;
                     if (fields != NULL && strlen(fields) > 0) {
                         j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
                     }
 
                     env->CallStaticVoidMethod(jClass, jMethod, progressionStatus, j_progression01, j_progression02, j_progression03, j_fields, mergeFields);
@@ -727,7 +746,7 @@ namespace gameanalytics {
             }
         }
 
-        void jni_addDesignEvent(const char *eventId, const char *fields, bool mergeFields)
+void jni_addDesignEvent(const char *eventId, const char *fields, bool mergeFields)
         {
             AttachScope attachscope;
             JNIEnv* env = attachscope.m_Env;
@@ -742,9 +761,12 @@ namespace gameanalytics {
                 {
                     jstring j_eventId = env->NewStringUTF(eventId);
                     
-                    jstring j_fields = NULL;
+                    // Default to "{}" instead of NULL
+                    jstring j_fields;
                     if (fields != NULL && strlen(fields) > 0) {
                         j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
                     }
 
                     env->CallStaticVoidMethod(jClass, jMethod, j_eventId, j_fields, mergeFields);
@@ -764,7 +786,7 @@ namespace gameanalytics {
             }
         }
 
-        void jni_addDesignEventWithValue(const char *eventId, float value, const char *fields, bool mergeFields)
+void jni_addDesignEventWithValue(const char *eventId, float value, const char *fields, bool mergeFields)
         {
             AttachScope attachscope;
             JNIEnv* env = attachscope.m_Env;
@@ -779,9 +801,12 @@ namespace gameanalytics {
                 {
                     jstring j_eventId = env->NewStringUTF(eventId);
                     
-                    jstring j_fields = NULL;
+                    // Default to "{}" instead of NULL
+                    jstring j_fields;
                     if (fields != NULL && strlen(fields) > 0) {
                         j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
                     }
 
                     env->CallStaticVoidMethod(jClass, jMethod, j_eventId, value, j_fields, mergeFields);
@@ -815,10 +840,18 @@ namespace gameanalytics {
                 if(jMethod)
                 {
                     jstring j_message = env->NewStringUTF(message);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, severity, j_message, j_fields, mergeFields);
                     env->DeleteLocalRef(j_message);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -833,7 +866,7 @@ namespace gameanalytics {
             }
         }
 
-        void jni_addAdEvent(int adAction, int adType, const char *adSdkName, const char *adPlacement, const char *fields, bool mergeFields)
+void jni_addAdEvent(int adAction, int adType, const char *adSdkName, const char *adPlacement, const char *fields, bool mergeFields)
         {
             AttachScope attachscope;
             JNIEnv *env = attachscope.m_Env;
@@ -848,11 +881,19 @@ namespace gameanalytics {
                 {
                     jstring j_adSdkName = env->NewStringUTF(adSdkName);
                     jstring j_adPlacement = env->NewStringUTF(adPlacement);
-                    jstring j_fields = env->NewStringUTF(fields);
+                    
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
+
                     env->CallStaticVoidMethod(jClass, jMethod, adAction, adType, j_adSdkName, j_adPlacement , j_fields, mergeFields);
                     env->DeleteLocalRef(j_adSdkName);
                     env->DeleteLocalRef(j_adPlacement);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
