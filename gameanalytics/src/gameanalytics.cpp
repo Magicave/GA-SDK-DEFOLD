@@ -482,7 +482,14 @@ static int addBusinessEvent(lua_State *L)
 #if defined(DM_PLATFORM_IOS)
         gameanalytics::defold::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType, receipt, fields, mergeFields);
 #elif defined(DM_PLATFORM_ANDROID)
-        gameanalytics::defold::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType, receipt, signature, fields, mergeFields);
+        if(!isStringNullOrEmpty(receipt) || !isStringNullOrEmpty(signature))
+        {
+            gameanalytics::defold::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType, receipt, signature, fields, mergeFields);
+        }
+        else
+        {
+            gameanalytics::defold::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType, fields, mergeFields);
+        }
 #else
         gameanalytics::defold::GameAnalytics::addBusinessEvent(currency, amount, itemType, itemId, cartType, fields, mergeFields);
 #endif
@@ -591,7 +598,7 @@ static int addResourceEvent(lua_State *L)
             {
                 if (lua_type(L, -1) == LUA_TBOOLEAN)
                 {
-                    mergeFields = lua_tostring(L, -1);
+                    mergeFields = lua_toboolean(L, -1);
                 }
                 else
                 {

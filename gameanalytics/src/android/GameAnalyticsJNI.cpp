@@ -593,7 +593,14 @@ namespace gameanalytics {
                     jstring j_receipt = env->NewStringUTF(receipt);
                     jstring j_store = env->NewStringUTF(store);
                     jstring j_signature = env->NewStringUTF(signature);
-                    jstring j_fields = env->NewStringUTF(fields);
+
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
                     env->CallStaticVoidMethod(jClass, jMethod, j_currency, amount, j_itemType, j_itemId, j_cartType, j_receipt, j_store, j_signature, j_fields, mergeFields);
                     env->DeleteLocalRef(j_currency);
                     env->DeleteLocalRef(j_itemType);
@@ -602,7 +609,7 @@ namespace gameanalytics {
                     env->DeleteLocalRef(j_receipt);
                     env->DeleteLocalRef(j_store);
                     env->DeleteLocalRef(j_signature);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -722,9 +729,12 @@ namespace gameanalytics {
                     jstring j_progression02 = env->NewStringUTF(progression02);
                     jstring j_progression03 = env->NewStringUTF(progression03);
                     
-                    jstring j_fields = NULL;
+                    // Default to "{}"
+                    jstring j_fields;
                     if (fields != NULL && strlen(fields) > 0) {
                         j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
                     }
 
                     env->CallStaticVoidMethod(jClass, jMethod, progressionStatus, j_progression01, j_progression02, j_progression03, (double)score, j_fields, mergeFields);
@@ -923,11 +933,18 @@ void jni_addAdEvent(int adAction, int adType, const char *adSdkName, const char 
                 {
                     jstring j_adSdkName = env->NewStringUTF(adSdkName);
                     jstring j_adPlacement = env->NewStringUTF(adPlacement);
-                    jstring j_fields = env->NewStringUTF(fields);
+
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
                     env->CallStaticVoidMethod(jClass, jMethod, adAction, adType, j_adSdkName, j_adPlacement, duration , j_fields, mergeFields);
                     env->DeleteLocalRef(j_adSdkName);
                     env->DeleteLocalRef(j_adPlacement);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
@@ -957,11 +974,18 @@ void jni_addAdEvent(int adAction, int adType, const char *adSdkName, const char 
                 {
                     jstring j_adSdkName = env->NewStringUTF(adSdkName);
                     jstring j_adPlacement = env->NewStringUTF(adPlacement);
-                    jstring j_fields = env->NewStringUTF(fields);
+
+                    // Default to "{}"
+                    jstring j_fields;
+                    if (fields != NULL && strlen(fields) > 0) {
+                        j_fields = env->NewStringUTF(fields);
+                    } else {
+                        j_fields = env->NewStringUTF("{}");
+                    }
                     env->CallStaticVoidMethod(jClass, jMethod, adAction, adType, j_adSdkName, j_adPlacement, noAdReason , j_fields, mergeFields);
                     env->DeleteLocalRef(j_adSdkName);
                     env->DeleteLocalRef(j_adPlacement);
-                    env->DeleteLocalRef(j_fields);
+                    if (j_fields) env->DeleteLocalRef(j_fields);
                 }
                 else
                 {
