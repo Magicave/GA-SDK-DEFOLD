@@ -62,6 +62,7 @@
 #include <assert.h>
 #include <vector>
 #include <cctype>
+#include <string>
 
 #include "GameAnalyticsDefold.h"
 
@@ -83,6 +84,74 @@ static int stringCmpi(const char *s1, const char *s2)
             return 1;
     }
     return 0;
+}
+
+static bool IsResourceCurrencyValid(const char* str, size_t len)
+{
+    if(!str || len == 0)
+    {
+        return false;
+    }
+    for(size_t i = 0; i < len; ++i)
+    {
+        if(!isalpha((unsigned char)str[i]))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+static std::string SanitizeResourceCurrencies(const char* list)
+{
+    if(!list || list[0] == '\0')
+    {
+        return "";
+    }
+
+    std::string result;
+    const char* token_start = list;
+    const char* p = list;
+
+    while(true)
+    {
+        if(*p == ',' || *p == '\0')
+        {
+            const char* token_end = p;
+            while(token_start < token_end && isspace((unsigned char)*token_start))
+            {
+                token_start++;
+            }
+            while(token_end > token_start && isspace((unsigned char)*(token_end - 1)))
+            {
+                token_end--;
+            }
+
+            size_t token_len = (size_t)(token_end - token_start);
+            if(IsResourceCurrencyValid(token_start, token_len))
+            {
+                if(!result.empty())
+                {
+                    result.append(",");
+                }
+                result.append(token_start, token_len);
+            }
+            else if(token_len > 0)
+            {
+                std::string invalid(token_start, token_len);
+                dmLogWarning("GameAnalytics: Ignoring invalid resource currency '%s' (only A-Z, a-z allowed)", invalid.c_str());
+            }
+
+            if(*p == '\0')
+            {
+                break;
+            }
+            token_start = p + 1;
+        }
+        p++;
+    }
+
+    return result;
 }
 
 static bool isStringNullOrEmpty(const char* s)
@@ -1421,6 +1490,22 @@ static dmExtension::Result InitializeExtension(dmExtension::Params* params)
     bool auto_detect_app_version = dmConfigFile::GetInt(params->m_ConfigFile, "gameanalytics.auto_detect_app_version", 0) == 1;
     manual_initialize = dmConfigFile::GetInt(params->m_ConfigFile, "gameanalytics.manual_initialize", 0) == 1;
 
+    std::string sanitized_resource_currencies;
+    const char* resource_currencies_sanitized = resource_currencies;
+    if(resource_currencies && resource_currencies[0] != '\0')
+    {
+        sanitized_resource_currencies = SanitizeResourceCurrencies(resource_currencies);
+        if(sanitized_resource_currencies.empty())
+        {
+            dmLogWarning("GameAnalytics: All resource currencies were invalid; skipping configureAvailableResourceCurrencies");
+            resource_currencies_sanitized = 0;
+        }
+        else
+        {
+            resource_currencies_sanitized = sanitized_resource_currencies.c_str();
+        }
+    }
+
 #if defined(DM_PLATFORM_ANDROID)
     game_key = dmConfigFile::GetString(params->m_ConfigFile, "gameanalytics.game_key_android", 0);
     secret_key = dmConfigFile::GetString(params->m_ConfigFile, "gameanalytics.secret_key_android", 0);
@@ -1536,9 +1621,9 @@ static dmExtension::Result InitializeExtension(dmExtension::Params* params)
     {
         gameanalytics::defold::GameAnalytics::configureAvailableCustomDimensions03(dimensions_03);
     }
-    if(resource_currencies)
+    if(resource_currencies_sanitized)
     {
-        gameanalytics::defold::GameAnalytics::configureAvailableResourceCurrencies(resource_currencies);
+        gameanalytics::defold::GameAnalytics::configureAvailableResourceCurrencies(resource_currencies_sanitized);
     }
     if(resource_item_types)
     {
