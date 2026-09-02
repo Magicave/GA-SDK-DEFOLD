@@ -65,6 +65,9 @@
 #include <string>
 
 #include "GameAnalyticsDefold.h"
+#if defined(DM_PLATFORM_ANDROID)
+#include "android/GameAnalyticsJNI.h"
+#endif
 
 #define VERSION "4.3.0"
 
@@ -1408,7 +1411,9 @@ static int setRemoteConfigsListener(lua_State *L)
     DM_LUA_STACK_CHECK(L, 0);
     if (g_remote_configs_listener)
     {
+        gameanalytics::defold::GameAnalytics::setRemoteConfigsListener(0);
         dmScript::DestroyCallback(g_remote_configs_listener);
+        g_remote_configs_listener = 0;
     }
     g_remote_configs_listener = dmScript::CreateCallback(L, 1);
     assert(dmScript::IsCallbackValid(g_remote_configs_listener));
@@ -1692,8 +1697,9 @@ static dmExtension::Result FinalizeExtension(dmExtension::Params* params)
     dmLogInfo("FinalizeExtension");
     gameanalytics::defold::GameAnalytics::onQuit();
 
-    if (params->m_L == dmScript::GetCallbackLuaContext(g_remote_configs_listener))
+    if (g_remote_configs_listener && params->m_L == dmScript::GetCallbackLuaContext(g_remote_configs_listener))
     {
+        gameanalytics::defold::GameAnalytics::setRemoteConfigsListener(0);
         dmScript::DestroyCallback(g_remote_configs_listener);
         g_remote_configs_listener = 0;
     }
@@ -1729,5 +1735,13 @@ static dmExtension::Result FinalizeExtension(dmExtension::Params* params)
 
 #endif
 
+static dmExtension::Result UpdateExtension(dmExtension::Params* params)
+{
+    (void)params;
+#if defined(DM_PLATFORM_ANDROID)
+    gameanalytics::jni_dispatchRemoteConfigsCallbacks();
+#endif
+    return dmExtension::RESULT_OK;
+}
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeExtension, AppFinalizeExtension, InitializeExtension, 0, 0, FinalizeExtension)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeExtension, AppFinalizeExtension, InitializeExtension, UpdateExtension, 0, FinalizeExtension)

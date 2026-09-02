@@ -6,6 +6,7 @@
 #include <dmsdk/dlib/log.h>
 #include <string.h>
 #include <stdio.h>
+#include <atomic>
 
 #define GAMEANALYTICS_CLASS_NAME "com/gameanalytics/sdk/GameAnalytics"
 #define GAJNI_CLASS_NAME "com/gameanalytics/sdk/GAJNI"
@@ -65,6 +66,7 @@ namespace gameanalytics {
     };
 
     dmScript::LuaCallbackInfo* _remote_configs_listener;
+    static std::atomic<unsigned int> _pending_remote_configs_updates(0);
 
     static jclass GetClass(JNIEnv* env, const char* classname)
     {
@@ -1433,28 +1435,44 @@ void jni_addAdEvent(int adAction, int adType, const char *adSdkName, const char 
 
         void jni_setRemoteConfigsListener(dmScript::LuaCallbackInfo* listener)
         {
+            _pending_remote_configs_updates.store(0, std::memory_order_release);
             _remote_configs_listener = listener;
         }
 
         JNIEXPORT void JNICALL Java_com_gameanalytics_sdk_GAJNI_onRemoteConfigsUpdatedNative(JNIEnv* env, jobject)
         {
-            if(!_remote_configs_listener)
+            _pending_remote_configs_updates.fetch_add(1, std::memory_order_release);
+        }
+
+        void jni_dispatchRemoteConfigsCallbacks()
+        {
+            unsigned int pending_updates = _pending_remote_configs_updates.exchange(0, std::memory_order_acquire);
+            if(pending_updates == 0)
             {
-                dmLogWarning("Received remote configs update but no listener was set!");
+                return;
+            }
+
+            if(!_remote_configs_listener || !dmScript::IsCallbackValid(_remote_configs_listener))
+            {
+                dmLogWarning("Received remote configs update but no valid listener was set!");
                 return;
             }
 
             lua_State* L = dmScript::GetCallbackLuaContext(_remote_configs_listener);
             DM_LUA_STACK_CHECK(L, 0);
 
-            if (!dmScript::SetupCallback(_remote_configs_listener))
+            for(unsigned int i = 0; i < pending_updates; ++i)
             {
-                dmLogWarning("SetupCallback failed for remote configs");
-                return;
-            }
+                if (!dmScript::SetupCallback(_remote_configs_listener))
+                {
+                    dmLogWarning("SetupCallback failed for remote configs");
+                    return;
+                }
 
-            int ret = dmScript::PCall(L, 1, 0);
-            dmScript::TeardownCallback(_remote_configs_listener);
+                int ret = dmScript::PCall(L, 1, 0);
+                (void)ret;
+                dmScript::TeardownCallback(_remote_configs_listener);
+            }
         }
 
         std::vector<char> jni_getRemoteConfigsContentAsString()

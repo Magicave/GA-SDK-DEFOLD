@@ -56,6 +56,7 @@ namespace gameanalytics {
         extern std::vector<char> jni_getRemoteConfigsValueAsStringWithDefaultValue(const char *key, const char *defaultValue);
         extern bool jni_isRemoteConfigsReady();
         extern void jni_setRemoteConfigsListener(dmScript::LuaCallbackInfo* listener);
+        extern void jni_dispatchRemoteConfigsCallbacks();
         extern JNIEXPORT void JNICALL Java_com_gameanalytics_sdk_GAJNI_onRemoteConfigsUpdatedNative(JNIEnv* env, jobject);
         extern std::vector<char> jni_getRemoteConfigsContentAsString();
 
